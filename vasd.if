@@ -1,0 +1,198 @@
+
+## <summary>policy for vasd</summary>
+
+
+########################################
+## <summary>
+##	Transition to vasd.
+## </summary>
+## <param name="domain">
+## <summary>
+##	Domain allowed to transition.
+## </summary>
+## </param>
+#
+interface(`vasd_domtrans',`
+	gen_require(`
+		type vasd_t, vasd_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	domtrans_pattern($1, vasd_exec_t, vasd_t)
+')
+
+
+########################################
+## <summary>
+##	Execute vasd server in the vasd domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`vasd_initrc_domtrans',`
+	gen_require(`
+		type vasd_initrc_exec_t;
+	')
+
+	init_labeled_script_domtrans($1, vasd_initrc_exec_t)
+')
+
+########################################
+## <summary>
+##      Search vasd lib directories.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`vasd_search_lib',`
+        gen_require(`
+                type vasd_lib_t;
+                type vasd_usr_t;
+        ')
+
+        allow $1 vasd_lib_t:dir search_dir_perms;
+        search_dirs_pattern($1, vasd_usr_t, vasd_lib_t)
+')
+
+########################################
+## <summary>
+##     Grants access to socket files found in
+##     /var/opt/quest/vas/vasd 
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##        Same as:
+##             allow $1 vasd_var_t:dir search_dir_perms;
+##             allow $1 vasd_var_auth_t:dir search_dir_perms;
+##             allow $1 vasd_var_auth_t:sock_file write_sock_file_perms;
+##             allow $1 vasd_t:unix_stream_socket connectto
+##             allow vasd_t vasd_var_auth_t:dir search_dir_perms;
+##             allow vasd_t $1:fifo_file write_fifo_file_perms;
+##      </summary>
+## </param>
+#
+interface(`vasd_stream_connect',`
+        gen_require(`
+                type vasd_t;
+                type vasd_var_t;
+                type vasd_var_auth_t;
+        ')
+
+        allow $1 vasd_var_t:dir search_dir_perms; 
+	stream_connect_pattern($1, vasd_var_auth_t, vasd_var_auth_t, vasd_t)
+
+')
+
+########################################
+## <summary>
+##      
+##     /opt/quest/lib64/security/pam_vas3.so
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`vasd_use_pam',`
+        gen_require(`
+                type vasd_lib_t;
+        ')
+
+	vasd_search_lib($1)
+        allow $1 vasd_lib_t:dir list_dir_perms;
+	read_lnk_files_pattern($1, vasd_lib_t, vasd_lib_t)
+        allow $1 vasd_lib_t:file exec_file_perms;
+')
+
+
+########################################
+## <summary>
+##	All of the rules required to administrate
+##	an vasd environment
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`vasd_admin',`
+	gen_require(`
+		type vasd_t;
+		type vasd_initrc_exec_t;
+                type vasd_var_t;
+                type vasd_var_auth_t;
+                type vasd_var_run_t;
+                type vasd_usr_t;
+                type vasd_man_t;
+		type vasd_bin_t;
+		type vasd_exec_t;
+                type vasd_lib_t;
+		type user_tmp_t;
+                type tmp_t;
+	')
+
+	allow $1 vasd_t:process { ptrace signal_perms };
+	ps_process_pattern($1, vasd_t)
+
+	vasd_initrc_domtrans($1)
+	domain_system_change_exemption($1)
+	role_transition $2 vasd_initrc_exec_t system_r;
+	allow $2 system_r;
+        
+        domain_use_interactive_fds($1)
+
+        files_search_etc($1)
+        files_search_tmp($1)
+        files_search_var($1)
+        files_search_spool($1)
+        files_search_var_lib($1)
+
+        files_manage_usr_files($1)
+        files_read_usr_files($1)
+        files_manage_generic_tmp_files($1)
+
+        admin_pattern($1, vasd_var_t)
+        admin_pattern($1, vasd_var_auth_t)
+        admin_pattern($1, vasd_var_run_t)
+
+        admin_pattern($1, vasd_usr_t)
+	admin_pattern($1, vasd_man_t)
+        admin_pattern($1, vasd_bin_t)
+        admin_pattern($1, vasd_exec_t)
+        admin_pattern($1, vasd_lib_t)
+     
+        # The vas_ccache_ren script renews the krb5cc cache, but when it does
+        # the cache then gets labeled as initrc_tmp_t. We probably want this to stay as 
+        # user_tmp_t, so other daemons like ssh can access it.
+        init_script_tmp_filetrans(vasd_t, user_tmp_t, file)
+
+        # For some reason when a user logins using login and their homedir is created
+        # it is being created at a tmp_t, translate this to a user_tmp_t
+        filetrans_pattern(vasd_t, tmp_t, user_tmp_t, file)
+    
+        userdom_home_filetrans_user_home_dir($1)
+        userdom_manage_home_role(system_r, $1)
+
+	#//TODO What was the purpose of this call?
+        userdom_manage_tmp_role(system_r, $1)
+
+        # Write unamed pipes for all domains
+        write_fifo_files_pattern($1, vasd_var_auth_t, domain)
+
+')
+

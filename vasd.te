@@ -1,0 +1,458 @@
+policy_module(vasd, 1.0.4)
+
+########################################
+#
+# Declarations
+#
+
+type vasd_t;
+type vasd_exec_t;
+init_daemon_domain(vasd_t, vasd_exec_t)
+
+permissive vasd_t;
+
+type vasd_initrc_exec_t;
+init_script_file(vasd_initrc_exec_t)
+
+init_script_tmp_filetrans(vasd_t, user_tmp_t, file)
+
+type vasd_var_t;
+files_type(vasd_var_t)
+
+type vasd_var_auth_t;
+files_type(vasd_var_auth_t)
+
+type vasd_var_run_t;
+files_pid_file(vasd_var_run_t)
+
+type vasd_usr_t;
+files_type(vasd_usr_t)
+
+type vasd_man_t;
+files_type(vasd_man_t)
+
+type vasd_bin_t;
+corecmd_executable_file( vasd_bin_t )
+
+type vasd_lib_t;
+files_type(vasd_lib_t)
+
+########################################
+#
+# vasd local policy
+#
+allow vasd_t self:capability { setuid fsetid setgid fowner sys_time dac_override chown kill sys_tty_config sys_ptrace };
+allow vasd_t self:process { fork setrlimit setpgid getpgid };
+
+allow vasd_t self:fifo_file rw_fifo_file_perms;
+allow vasd_t self:unix_stream_socket create_stream_socket_perms;
+
+# =============================================================
+#
+# filetrans_pattern(vasd_t, vasd_var_auth_t, vasd_var_run_t, file)
+#
+# Translate pid files created in a dir with type
+# vasd_var_auth_t to vasd_var_run_t. This is to make sure that
+# .vasd.pid is labelled correctly
+#
+# =============================================================
+ filetrans_pattern(vasd_t, vasd_var_auth_t, vasd_var_run_t, file)
+
+# =============================================================
+#
+# files_pid_filetrans(vasd_t, vasd_var_run_t, file
+#
+# Translate pid files created as var_run_t to vasd_var_run_t
+# This is for pids such as vasdidmapd.pid which is created in
+# /var/run/
+#
+# Same as:
+#      allow vasd_t var_t:dir search_dir_perms;
+#      allow vasd_t var_run_t:dir rw_dir_perms;
+#      type_transition vasd_t var_run_t:vasd_var_run_t file;
+#
+# =============================================================
+ files_pid_filetrans(vasd_t, vasd_var_run_t, file )
+
+
+# =============================================================
+# Allows vasd_t to run unix_chkpwd to check a password
+#
+# Same as:
+#      allow vasd_t auth_cache_t:dir search_dir_perms;
+#      allow vasd_t bin_t:dir search_dir_perms;
+#      allow vasd_t bin_t:dir search_dir_perms;
+#      
+#      allow vasd_t chkpwd_exec_t:file { getattr open read execute };
+#      allow vasd_t chkpwd_t:process transition;
+#      dontaudit vasd_t chkpwd_t:process { noatsecure siginh rlimitinh };
+#
+#      type_transition vasd_t chkpwd_exec_t:process chkpwd_t
+#
+#      allow chkpwd_t vasd_t:fd use;
+#      allow chkpwd_t vasd_t:fifo_file rw_inherited_fifo_file_perms;
+#      allow chkpwd_t vasd_t:process sigchld;
+#
+#      dontaudit vasd_t shadow_t:file read_file_perms;
+#
+#        dev_read_rand(vasd_t)
+#        dev_read_urand(vasd_t)
+#        auth_use_nsswitch(vasd_t)
+#        auth_rw_faillog(vasd_t)
+#
+#        logging_send_audit_msgs(vasd_t)
+#
+#        miscfiles_read_certs(vasd_t)
+#
+#        auth_domtrans_upd_passwd(vasd_t)
+#
+#
+# =============================================================
+ auth_domtrans_chk_passwd(vasd_t)
+
+
+# =============================================================
+#
+# allow vasd_t to read the system state /proc
+#  
+#  Resolves: avc:  denied  { read open } for  pid=1260 comm="vasd"
+#    name="meminfo" dev=proc ino=4026532034 
+#    scontext=system_u:system_r:vasd_t:s0 
+#    tcontext=system_u:object_r:proc_t:s0 tclass=file
+#
+#  Same as:
+#       allow vasd_t proc_t:file read_file_perms;
+#       allow vasd_t proc_t:dir search_dir_perms;
+#       allow vasd_t proc_t:dir list_dir_perms;
+#       allow vasd_t proc_t:lnk_file read_lnk_file_perms;
+# =============================================================
+  kernel_read_system_state(vasd_t)
+
+
+# =============================================================
+# Allow vasd_t to get the attributes of all filesystems
+#
+# Same as:
+#      allow vasd_t filesystem_type:filesystem getattr;
+#      allow vasd_t file_type:filesystem getattr;
+#
+# =============================================================
+ fs_getattr_all_fs(vasd_t)
+
+
+# =============================================================
+# Allow for transfers from the /var/spool dir to things like
+# system_cron_spool_t
+#
+# Same as:
+#      allow vasd_t var_spool_t:dir search_dir_perms;
+#      allow vasd_t file_type:file getattr_file_perms;
+#
+# =============================================================
+ getattr_files_pattern(vasd_t, var_spool_t, file_type)
+
+
+# =============================================================
+# Allow vasd_t to execute user temporary files.
+#
+# Same as:
+#      allow vasd_t user_tmp_t:dir search_dir_perms;
+#      allow domain user_tmp_t:file exec_file_perms;
+#      dontaudit vasd_t user_tmp_t:sock_file execute;
+#      allow vasd_t tmp_t:dir search_dir_perms;
+#
+# =============================================================
+ userdom_exec_user_tmp_files(vasd_t)
+
+
+# =============================================================
+# Allow vasd_t to execute all executable files
+#
+# Same as:
+#      allow vasd_t exec_type:file { mmap_file_perms ioctl lock execute_no_trans };
+#      allow vasd_t bin_t:dir search_dir_perms;
+#      allow vasd_t bin_t:dir list_dir_perms;
+#      allow vasd_t exec_type:lnk_file read_lnk_file_perms;
+#
+# =============================================================
+ corecmd_exec_all_executables(vasd_t)
+
+
+# =============================================================
+# Allows vasd_t to inherit and use file descriptors form
+# domains with interactive programs.
+#
+# Same as:
+#      allow vasd_t privfd:fd use;
+#
+# =============================================================
+ domain_use_interactive_fds(vasd_t)
+
+
+# =============================================================
+# Allow create, read, write and delete files in /etc/ that are
+# dynamically created on boot, such as mtab.
+#
+# Same as:
+#      allow vasd_t { etc_t etc_runtime_t }:dir rw_dir_perms;
+#      allow vasd_t etc_runtime_t:file manage_file_perms;
+#      allow vasd_t etc_t:dir search_dir_perms;
+#      allow vasd_t etc_runtime_t:lnk_file read_lnk_file_perms;
+#
+# =============================================================
+ files_manage_etc_runtime_files(vasd_t)
+
+
+# =============================================================
+# Allow create, read, write and delete generic files in /etc
+#
+# Same as:
+#      allow vasd_t etc_t:dir rw_dir_perms;
+#      allow vasd_t etc_t:file manage_file_perms;
+#      allow vasd_t etc_t:dir search_dir_perms;
+#      allow vasd_t etc_t:lnk_file read_lnk_file_perms;
+#
+# =============================================================
+ files_manage_etc_files(vasd_t)
+
+
+# =============================================================
+# Allow vasd_t to manage generic directories in /etc
+#  This was included for the case where we do not label our
+#  etc directory and qron.d need write privs. Will not be an 
+#  issue if we go with vasd_conf_t as a label and manage
+#  the dirs and files that are labelled that way.
+#
+# Same as:
+#      allow vasd_t etc_t:dir rw_dir_perms;
+#      allow vasd_t etc_t:dir manage_dir_perms;
+# =============================================================
+ files_manage_etc_dirs(vasd_t)
+
+
+# =============================================================
+# Allows vasd_t to read generic files in /etc like:
+#     /etc/fstab, /etc/passwd, /etc/services, /etc/shells
+#
+# Same as:
+#      allow vasd_t etc_t:dir list_dir_perms;
+#      allow vasd_t etc_t:dir search_dir_perms;
+#      allow vasd_t etc_t:file read_file_perms;
+#      allow vasd_t etc_t:dir search_dir_perms;
+#      allow vasd_t etc_t:lnk_file read_lnk_file_perms;
+#      allow vasd_t configfile:dir list_dir_perms;
+#      allow vasd_t configfile:dir search_dir_perms;
+#      allow vasd_t configfile:file read_file_perms;
+#      allow vasd_t configfile:dir search_dir_perms;
+#      allow vasd_t configfile:lnk_file read_lnk_file_perms;
+#
+# =============================================================
+ files_read_etc_files(vasd_t)
+
+
+# =============================================================
+# Allows vasd_t to domain wide list directory permissions, read
+# file and link permisions as well as get attributes of
+# processes.
+#
+# Same as:
+#      allow vasd_t domain:dir list_dir_perms;
+#      allow vasd_t domain:file read_file_perms;
+#      allow vasd_t domain:lnk_file read_lnk_file_perms;
+#      allow vasd_t domain:process getattr;
+#
+# =============================================================
+ ps_process_pattern(vasd_t, domain)
+
+
+# =============================================================
+# Read utmp
+#
+# Same as:
+#      allow vasd_t var_t:dir search_dir_perms;
+#      allow vasd_t var_run_t:dir list_dir_perms;
+#      allow vasd_t initrc_var_run_t:file read_file_perms;
+# =============================================================
+ init_read_utmp(vasd_t)
+
+
+# =============================================================
+#
+# Read and write init script temporary data.
+#
+# Same as:
+#      allow vasd_t tmp_t:dir search_dir_perms;
+#      allow vasd_t initrc_tmp_t:dir search_dir_perms;
+#      allow vasd_t initrc_tmp_t:file rw_file_perms;     
+#
+# =============================================================
+# init_rw_script_tmp_files(vasd_t)
+
+
+# =============================================================
+#
+# Same as:
+#      allow vasd_t { proc_t sysctl_t sysctl_kernel_t }:dir search_dir_perms;
+#      allow vasd_t sysctl_kernel_t:file read_file_perms;
+#      allow vasd_t { proc_t sysctl_t }:dir search_dir_perms;
+#      allow vasd_t sysctl_kernel_t:dir list_dir_perms;
+# =============================================================
+ kernel_read_kernel_sysctls(vasd_t)
+
+
+# =============================================================
+# 
+# boolean that when set will allow vasd_t to bind to any port.
+# Things like vasidmapd, vasproxyd can be started up and bound
+# to any port by the user.  If they are not using the default
+# ports this boolean will need to be set to true.
+#
+# =============================================================
+ gen_tunable(allow_vasd_bind_all,false)
+ tunable_policy(`allow_vasd_bind_all',`
+        corenet_tcp_bind_all_ports(vasd_t)
+        corenet_udp_bind_all_ports(vasd_t)
+ ')
+
+
+# =============================================================
+# 
+# Allow vasd_t basic network permissions such as:
+#          allow vasd_t self:tcp_socket create_stream_socket_perms;
+#          allow vasd_t self:udp_socket create_socket_perms;
+#          corenet_tcp_connect_all_ports(vasd_t)
+#
+# =============================================================
+ userdom_basic_networking(vasd_t)
+
+
+# =============================================================
+#
+# Allow the vasd_t to look up user, password, group, or host
+# information using the name service.
+#
+# =============================================================
+ auth_use_nsswitch(vasd_t)
+
+
+# =============================================================
+#
+# Allows vasd_t to bind UDP sockets to the ntp port. This is 
+# needed for timesync.
+#
+# Same as:
+#      allow vasd_t ntp_port_t:udp_socket name_bind;
+#      allow vasd_t self:capability net_bind_service;
+#
+# =============================================================
+ corenet_udp_bind_ntp_port(vasd_t)
+
+
+# =============================================================
+#
+# Allows vasd_t to bind tcp sockets to the ldap port
+#
+# Same as:
+#      allow vasd_t ldap_port_t:tcp_socket name_bind;
+#      allow vasd_t self:capability net_bind_service;
+#
+# =============================================================
+ corenet_tcp_bind_ldap_port(vasd_t)
+
+
+# =============================================================
+#
+# Allows vasd_t to make a TCP connection to the 
+# kerberos_password_port_t
+#
+# Same as:
+#      allow vasd_t kerberos_password_port_t:tcp_socket name_connect;
+#
+# =============================================================
+# corenet_tcp_connect_kerberos_password_port(vasd_t)
+
+
+# =============================================================
+#
+# Allows vasd_t to make a TCP connection to the
+# smbd_port_t
+#
+# Same as:
+#      allow vasd_t smbd_port_t:tcp_socket name_connect;
+#
+# =============================================================
+# corenet_tcp_connect_smbd_port(vasd_t)
+
+
+# =============================================================
+# 
+# Allow vasd_t to read localization information such as:
+# /etc/localtime and files in /usr/share/zoneinfo
+#
+# =============================================================
+ miscfiles_read_localization(vasd_t)
+
+
+# =============================================================
+# Allow vasd_t to write to the system log service (syslog)
+#
+# =============================================================
+ logging_send_syslog_msg(vasd_t)
+
+
+# =============================================================
+#
+# Allow vasd_t to send audit messages.
+#
+# Same as:
+#      allow vasd_t self:capability audit_write;
+#      allow vasd_t self:netlink_audit_socket { r_netlink_socket_perms nlmsg_relay };
+#
+# =============================================================
+ logging_send_audit_msgs(vasd_t)
+
+
+# =============================================================
+# From the vasd.if. Allows domainwide access to vasd pid and
+# socket files.
+#
+# =============================================================
+ vasd_stream_connect(domain)
+
+
+# =============================================================
+# From the vasd.if. Allows domainwide access to vasd libs. 
+# Any domain that needs to auth against pam will need access
+# and execute our pam library.
+#
+# =============================================================
+ vasd_use_pam(domain)
+
+
+# =============================================================
+# Allows vasd_t to admin the vasd_t domain
+#
+# =============================================================
+ vasd_admin(vasd_t, system_r)
+
+
+# =============================================================
+#
+# Allow vasd_t to search a var_yp_t (NIS data) directory. 
+# This is for vasypd.
+#
+# Same as:
+#      allow vasd_t var_t:dir search_dir_perms;
+#      allow vasd_t var_yp_t:dir list_dir_perms;
+#
+# =============================================================
+ nis_list_var_yp(vasd_t)
+
+
+optional_policy(`
+        kerberos_rw_config(vasd_t)
+        kerberos_use(vasd_t)
+#	optional_policy(`
+#	       kerberos_read_home_content(vasd_t)
+#	')
+')

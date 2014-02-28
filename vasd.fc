@@ -1,0 +1,18 @@
+
+/etc/rc.d/init.d/vasd	        	 --	gen_context(system_u:object_r:vasd_initrc_exec_t,s0)
+/opt/quest/sbin/.vasd			 --	gen_context(system_u:object_r:vasd_exec_t,s0)
+/opt/quest/sbin/vasd			 --	gen_context(system_u:object_r:vasd_exec_t,s0)
+/var/opt/quest/vas/vasd/.vasd.pid 	 --    	gen_context(system_u:object_r:vasd_var_run_t,s0)
+/var/opt/quest/vas/vasd/.vasd40_ipc_sock -s 	gen_context(system_u:object_r:vasd_var_auth_t,s0)
+
+/var/opt/quest(/.*)?            gen_context(system_u:object_r:vasd_var_t,s0)
+/var/opt/quest/vas/vasd(/.*)?   gen_context(system_u:object_r:vasd_var_auth_t,s0)
+
+/opt/quest(/.*)?		gen_context(system_u:object_r:vasd_usr_t,s0)
+/opt/quest/bin(/.*)?		gen_context(system_u:object_r:vasd_bin_t,s0)
+/opt/quest/man(/.*)?    	gen_context(system_u:object_r:vasd_man_t,s0)
+/opt/quest/libexec(/.*)? 	gen_context(system_u:object_r:vasd_bin_t,s0)
+/opt/quest/sbin(/.*)?   	gen_context(system_u:object_r:vasd_exec_t,s0)
+
+/opt/quest/lib(32)?(64)?(/.*)?  gen_context(system_u:object_r:vasd_lib_t,s0)
+
