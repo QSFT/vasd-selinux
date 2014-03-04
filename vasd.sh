@@ -27,13 +27,13 @@ set_Makefile()
 	case "$PLATFORM" in
 		Ubuntu)
 			MAKEFILE="/usr/share/selinux/default/include/Makefile"
-			;;
+		;;
 		RedHatEnterpriseServer)
 			MAKEFILE="/usr/share/selinux/devel/Makefile"
-			;;
+		;;
 		*)
-            MAKEFILE="/usr/share/selinux/devel/Makefile"
-            ;;
+	        	MAKEFILE="/usr/share/selinux/devel/Makefile"
+        	;;
 	esac
 }
 
@@ -78,10 +78,6 @@ set -x
 make -f "$MAKEFILE" || exit
 /usr/sbin/semodule -i vasd.pp
 
-#semanage fcontext -l | grep "/var/opt/quest/vas/vasd(/.*)?" && semanage fcontext -m -t vasd_var_auth_t "/var/opt/quest/vas/vasd(/.*)?"
-
-# Fixing the file context on /opt/quest/sbin/.vasd
-/sbin/restorecon -F -R -v /opt/quest/sbin/.vasd
 # Fixing the file context on /etc/rc\.d/init\.d/vasd
 /sbin/restorecon -F -R -v /etc/rc\.d/init\.d/vasd
 
