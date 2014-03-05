@@ -368,6 +368,8 @@ allow vasd_t self:unix_stream_socket create_stream_socket_perms;
 # Same as:
 #      allow vasd_t kerberos_password_port_t:tcp_socket name_connect;
 #
+# Currently provided by: userdom_basic_networking
+#
 # =============================================================
 # corenet_tcp_connect_kerberos_password_port(vasd_t)
 
@@ -379,6 +381,8 @@ allow vasd_t self:unix_stream_socket create_stream_socket_perms;
 #
 # Same as:
 #      allow vasd_t smbd_port_t:tcp_socket name_connect;
+#
+# Currently provided by: userdom_basic_networking
 #
 # =============================================================
 # corenet_tcp_connect_smbd_port(vasd_t)
