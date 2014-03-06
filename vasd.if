@@ -85,7 +85,7 @@ interface(`vasd_stream_connect',`
                 type vasd_var_auth_t;
         ')
 
-        allow $1 vasd_var_t:dir search_dir_perms; 
+    allow $1 vasd_var_t:dir search_dir_perms; 
 	stream_connect_pattern($1, vasd_var_auth_t, vasd_var_auth_t, vasd_t)
 
 ')
@@ -112,10 +112,10 @@ interface(`vasd_read_var_auth',`
                 type vasd_var_auth_t;
         ')
 
-        allow $1 vasd_var_t:dir search_dir_perms;
+    allow $1 vasd_var_t:dir search_dir_perms;
 	allow $1 vasd_var_auth_t:file read_file_perms;
 
-        read_files_pattern( $1, vasd_var_t, vasd_var_auth_t)
+    read_files_pattern( $1, vasd_var_t, vasd_var_auth_t)
 
 ')
 
@@ -136,9 +136,9 @@ interface(`vasd_use_pam',`
         ')
 
 	vasd_search_lib($1)
-        allow $1 vasd_lib_t:dir list_dir_perms;
+    allow $1 vasd_lib_t:dir list_dir_perms;
 	read_lnk_files_pattern($1, vasd_lib_t, vasd_lib_t)
-        allow $1 vasd_lib_t:file exec_file_perms;
+    allow $1 vasd_lib_t:file exec_file_perms;
 ')
 
 
@@ -162,18 +162,18 @@ interface(`vasd_use_pam',`
 interface(`vasd_admin',`
 	gen_require(`
 		type httpd_t;
-                type tmp_t;
+        type tmp_t;
 		type user_tmp_t;
 		type vasd_t;
 		type vasd_initrc_exec_t;
-                type vasd_var_t;
-                type vasd_var_auth_t;
-                type vasd_var_run_t;
-                type vasd_usr_t;
-                type vasd_man_t;
+        type vasd_var_t;
+        type vasd_var_auth_t;
+        type vasd_var_run_t;
+        type vasd_usr_t;
+        type vasd_man_t;
 		type vasd_bin_t;
 		type vasd_exec_t;
-                type vasd_lib_t;
+        type vasd_lib_t;
 	')
 
 	allow $1 vasd_t:process { ptrace signal_perms };
@@ -184,46 +184,46 @@ interface(`vasd_admin',`
 	role_transition $2 vasd_initrc_exec_t system_r;
 	allow $2 system_r;
         
-        domain_use_interactive_fds($1)
+    domain_use_interactive_fds($1)
 
-        files_search_etc($1)
-        files_search_tmp($1)
-        files_search_var($1)
-        files_search_spool($1)
-        files_search_var_lib($1)
+    files_search_etc($1)
+    files_search_tmp($1)
+    files_search_var($1)
+    files_search_spool($1)
+    files_search_var_lib($1)
 
-        files_manage_usr_files($1)
-        files_read_usr_files($1)
-        files_manage_generic_tmp_files($1)
+    files_manage_usr_files($1)
+    files_read_usr_files($1)
+    files_manage_generic_tmp_files($1)
 
-        admin_pattern($1, vasd_var_t)
-        admin_pattern($1, vasd_var_auth_t)
-        admin_pattern($1, vasd_var_run_t)
+    admin_pattern($1, vasd_var_t)
+    admin_pattern($1, vasd_var_auth_t)
+    admin_pattern($1, vasd_var_run_t)
 
-        admin_pattern($1, vasd_usr_t)
-	admin_pattern($1, vasd_man_t)
-        admin_pattern($1, vasd_bin_t)
-        admin_pattern($1, vasd_exec_t)
-        admin_pattern($1, vasd_lib_t)
+    admin_pattern($1, vasd_usr_t)
+ 	admin_pattern($1, vasd_man_t)
+    admin_pattern($1, vasd_bin_t)
+    admin_pattern($1, vasd_exec_t)
+    admin_pattern($1, vasd_lib_t)
      
-        # The vas_ccache_ren script renews the krb5cc cache, but when it does
-        # the cache then gets labeled as initrc_tmp_t. We probably want this to stay as 
-        # user_tmp_t, so other daemons like ssh can access it.
-        init_script_tmp_filetrans(vasd_t, user_tmp_t, file)
+    # The vas_ccache_ren script renews the krb5cc cache, but when it does
+    # the cache then gets labeled as initrc_tmp_t. We probably want this to stay as 
+    # user_tmp_t, so other daemons like ssh can access it.
+    init_script_tmp_filetrans(vasd_t, user_tmp_t, file)
 
-        # For some reason when a user logins using login and their homedir is created
-        # it is being created as a tmp_t, translate this to a user_tmp_t
-        filetrans_pattern(vasd_t, tmp_t, user_tmp_t, file)
+    # For some reason when a user logins using login and their homedir is created
+    # it is being created as a tmp_t, translate this to a user_tmp_t
+    filetrans_pattern(vasd_t, tmp_t, user_tmp_t, file)
     
-        userdom_home_filetrans_user_home_dir($1)
-        userdom_manage_home_role(system_r, $1)
+    userdom_home_filetrans_user_home_dir($1)
+    userdom_manage_home_role(system_r, $1)
 
 	# Manage user temporary files
 	# Needed for /tmp/krb5cc_xxxx cache files
-        userdom_manage_tmp_role(system_r, $1)
+    userdom_manage_tmp_role(system_r, $1)
 
-        # Write unamed pipes for all domains
-        write_fifo_files_pattern($1, vasd_var_auth_t, domain)
+    # Write unamed pipes for all domains
+    write_fifo_files_pattern($1, vasd_var_auth_t, domain)
 
 	# MAV gets loaded under appache, but still needs read access to our misc_cache.
 	# Could be made a boolean
