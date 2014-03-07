@@ -42,7 +42,7 @@ files_type(vasd_lib_t)
 # vasd local policy
 #
 allow vasd_t self:capability { setuid fsetid setgid fowner sys_time dac_override chown kill sys_tty_config sys_ptrace };
-allow vasd_t self:process { fork setrlimit setpgid getpgid };
+allow vasd_t self:process { fork setrlimit setpgid getpgid setsched };
 
 allow vasd_t self:fifo_file rw_fifo_file_perms;
 allow vasd_t self:unix_stream_socket create_stream_socket_perms;
@@ -328,6 +328,18 @@ allow vasd_t self:unix_stream_socket create_stream_socket_perms;
 
 # =============================================================
 #
+# Allows vasd_t to bind TCP sockets to generic ports
+#
+# Same as:
+#      allow vasd_t port_t:tcp_socket name_bind;
+#      dontaudit vasd_t { port_type -port_t }:tcp_socket name_bind;
+#
+# =============================================================
+ corenet_tcp_bind_generic_port(vasd_t)
+
+
+# =============================================================
+#
 # Allow the vasd_t to look up user, password, group, or host
 # information using the name service.
 #
@@ -453,6 +465,22 @@ allow vasd_t self:unix_stream_socket create_stream_socket_perms;
  nis_list_var_yp(vasd_t)
 
 
+# =============================================================
+# Allows vasd_t to create, read, write, and delete generic log
+# files.
+#
+# Fixes:
+#      allow vasd_t var_log_t:dir { write remove_name add_name };
+#      allow vasd_t var_log_t:file { read write create unlink };
+#
+# Same as:
+#      allow vasd_t var_t:dir search_dir_perms;
+#      allow vasd_t var_log_t:dir rw_dir_perms;
+#      allow vasd_t var_log_t:file manage_file_perms;
+#
+# =============================================================
+ logging_manage_generic_logs(vasd_t)
+
 optional_policy(`
         kerberos_rw_config(vasd_t)
         kerberos_use(vasd_t)
@@ -460,3 +488,9 @@ optional_policy(`
 #	       kerberos_read_home_content(vasd_t)
 #	')
 ')
+
+optional_policy(`
+        dbus_system_bus_client(vasd_t)
+        dbus_connect_system_bus(vasd_t)
+')
+
