@@ -80,6 +80,7 @@ make -f "$MAKEFILE" || exit
 
 # Fixing the file context on /etc/rc\.d/init\.d/vasd
 /sbin/restorecon -F -R -v /etc/rc\.d/init\.d/vasd
+/sbin/restorecon -F -R -v /etc/init\.d/vasd
 
 /sbin/restorecon -F -R -v /opt/quest/
 /sbin/restorecon -F -R -v /etc/opt/quest/
