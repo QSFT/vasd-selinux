@@ -86,7 +86,7 @@ interface(`vasd_stream_connect',`
         ')
 
     allow $1 vasd_var_t:dir search_dir_perms; 
-	stream_connect_pattern($1, vasd_var_auth_t, vasd_var_auth_t, vasd_t)
+    stream_connect_pattern($1, vasd_var_auth_t, vasd_var_auth_t, vasd_t)
 
 ')
 
@@ -113,7 +113,7 @@ interface(`vasd_read_var_auth',`
         ')
 
     allow $1 vasd_var_t:dir search_dir_perms;
-	allow $1 vasd_var_auth_t:file read_file_perms;
+    allow $1 vasd_var_auth_t:file read_file_perms;
 
     read_files_pattern( $1, vasd_var_t, vasd_var_auth_t)
 
@@ -135,9 +135,9 @@ interface(`vasd_use_pam',`
                 type vasd_lib_t;
         ')
 
-	vasd_search_lib($1)
+    vasd_search_lib($1)
     allow $1 vasd_lib_t:dir list_dir_perms;
-	read_lnk_files_pattern($1, vasd_lib_t, vasd_lib_t)
+    read_lnk_files_pattern($1, vasd_lib_t, vasd_lib_t)
     allow $1 vasd_lib_t:file exec_file_perms;
 ')
 
@@ -161,18 +161,18 @@ interface(`vasd_use_pam',`
 #
 interface(`vasd_admin',`
 	gen_require(`
-		type httpd_t;
+	type httpd_t;
         type tmp_t;
-		type user_tmp_t;
-		type vasd_t;
-		type vasd_initrc_exec_t;
+	type user_tmp_t;
+	type vasd_t;
+	type vasd_initrc_exec_t;
         type vasd_var_t;
         type vasd_var_auth_t;
         type vasd_var_run_t;
         type vasd_usr_t;
         type vasd_man_t;
-		type vasd_bin_t;
-		type vasd_exec_t;
+	type vasd_bin_t;
+	type vasd_exec_t;
         type vasd_lib_t;
 	')
 
@@ -201,7 +201,7 @@ interface(`vasd_admin',`
     admin_pattern($1, vasd_var_run_t)
 
     admin_pattern($1, vasd_usr_t)
- 	admin_pattern($1, vasd_man_t)
+    admin_pattern($1, vasd_man_t)
     admin_pattern($1, vasd_bin_t)
     admin_pattern($1, vasd_exec_t)
     admin_pattern($1, vasd_lib_t)
@@ -218,15 +218,16 @@ interface(`vasd_admin',`
     userdom_home_filetrans_user_home_dir($1)
     userdom_manage_home_role(system_r, $1)
 
-	# Manage user temporary files
-	# Needed for /tmp/krb5cc_xxxx cache files
+    # Manage user temporary files
+    # Needed for /tmp/krb5cc_xxxx cache files
     userdom_manage_tmp_role(system_r, $1)
 
     # Write unamed pipes for all domains
     write_fifo_files_pattern($1, vasd_var_auth_t, domain)
 
-	# MAV gets loaded under appache, but still needs read access to our misc_cache.
-	# Could be made a boolean
-	vasd_read_var_auth(httpd_t)
+    # Grant domain read access to our cache files
+    # Maybe we need to relabel these to something specific for vasd databases so as to not
+    # give more access to all vasd_var_auth_t then needed.
+    vasd_read_var_auth(domain)
 
 ')
