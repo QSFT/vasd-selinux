@@ -59,7 +59,7 @@ if [ $# -eq 1 ]; then
 			echo "No new avcs found"
 			exit 0
 		fi
-        elif [ "$1" = "clean" ]; then
+    elif [ "$1" = "clean" ]; then
                 echo "Cleaning Policy"
                 set -x
         	make -f "$MAKEFILE" clean || exit
