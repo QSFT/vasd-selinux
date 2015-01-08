@@ -2,7 +2,7 @@
 
 Jayson Hurst <jayson.hurst@software.dell.com>
 
-# Description
+## Description
 
 A Red Hat Enterprise Linux SELinux policy for the Dell Authentication Services (a.k.a QAS or VAS)
 
@@ -46,7 +46,7 @@ On some versions of RHEL there is already a security context defined for the /va
 
 ~~~ bash
  make -f /usr/share/selinux/devel/Makefile || exit
- /usr/sbin/semodule -i qasd.pp <<<<< Add below this line
+ /usr/sbin/semodule -i vasd.pp <<<<< Add below this line
  
  semanage fcontext -m -t vasd_var_auth_t "/var/opt/quest/vas/vasd(/.*)?"
 ~~~
