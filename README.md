@@ -29,7 +29,7 @@ Dependencies:
 When installing the vasd.pp SELinux policy the following error may occur (RHEL bug# 1141967)
 
 ~~~bash
- Multiple different specifications for /var/opt/quest/vas/vasd(/.*)?
+ Multiple different specifications for /var/opt/quest/vas/vasd(/.\*)?
 ~~~
 
 On some versions of RHEL there is already a security context defined for the /var/opt/quest/vas/vasd directory.
@@ -38,15 +38,15 @@ On some versions of RHEL there is already a security context defined for the /va
 
 1. Modify the file vasd.fc and comment out the following line:
 
-~~~bash
-# /var/opt/quest/vas/vasd(/.*)?   gen_context(system_u:object_r:vasd_var_auth_t,s0)
-~~~
+        ```bash
+        # /var/opt/quest/vas/vasd(/.*)?   gen_context(system_u:object_r:vasd_var_auth_t,s0)
+        ```
 
-2. Modify the file vasd.sh and add the following line below:
+2. Modify the file vasd.sh and add the *semanage* line below following section:
 
-~~~ bash
- make -f /usr/share/selinux/devel/Makefile || exit
- /usr/sbin/semodule -i vasd.pp <<<<< Add below this line
+        ```bash
+        make -f /usr/share/selinux/devel/Makefile || exit
+        /usr/sbin/semodule -i vasd.pp <<<<< Add below this line
  
- semanage fcontext -m -t vasd_var_auth_t "/var/opt/quest/vas/vasd(/.*)?"
-~~~
+        semanage fcontext -m -t vasd_var_auth_t "/var/opt/quest/vas/vasd(/.*)?"
+        ```
