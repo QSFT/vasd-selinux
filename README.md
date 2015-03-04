@@ -29,7 +29,7 @@ Dependencies:
 When installing the vasd.pp SELinux policy the following error may occur (RHEL bug# 1141967)
 
 ~~~bash
- Multiple different specifications for /var/opt/quest/vas/vasd(/.\*)?
+ Multiple different specifications for /var/opt/quest/vas/vasd(/.*)?
 ~~~
 
 On some versions of RHEL there is already a security context defined for the /var/opt/quest/vas/vasd directory.
