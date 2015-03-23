@@ -23,7 +23,7 @@ Dependencies:
 ~~~
 
 ### Reporting Bugs
-To report an issue with the vasd-selinux module please use <a href=https://bugsrc.quest.com/buglist.cgi?component=vasd%20selinux%20policy&list_id=101&product=vasd-selinux" >Bugzilla</a> to submit a bug report.
+To report an issue with the vasd-selinux module please use <a href="https://bugsrc.quest.com/buglist.cgi?component=vasd%20selinux%20policy&list_id=101&product=vasd-selinux">Bugzilla</a> to submit a bug report.
 When creating a bug report please try to pinpoint the exact problem and provide detailed reproduction steps.
 
 #### Known Issues
