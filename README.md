@@ -51,7 +51,7 @@ On some versions of RHEL there is already a security context defined for the /va
 
 ***Workaround***
 
- It is suggested that the home directories should be restored to their default file context lables by running:
+ It is suggested that the home directories should be restored to their default file contexts by running:
 
 ~~~bash
     sbin/restorecon -F -R -v /home
