@@ -13,6 +13,7 @@ Dependencies:
  * **RHEL 6 & equivalent** or higher 
  * policycoreutils-python (audit2allow)
  * policycoreutils (semodule, restorecon)
+ * selinux-policy-devel
 
 ### Source
 
