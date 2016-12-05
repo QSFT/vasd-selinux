@@ -2,12 +2,12 @@
 
 ## Description
 
-A Red Hat Enterprise Linux SELinux policy for the Dell Authentication Services (a.k.a QAS or VAS)
+A Red Hat Enterprise Linux SELinux policy for the Authentication Services (a.k.a QAS or VAS)
 
 INSTALLATION
 ------------
 Requires:
- * Dell Authentication Services 4.1.0.20886 or newer.
+ * Quest Authentication Services 4.1.0.20886 or newer.
 
 Dependencies:
  * **RHEL 6 & equivalent** or higher 
@@ -18,7 +18,7 @@ Dependencies:
 ### Source
 
 ~~~bash
-  $ git clone https://github.com/dell-oss/vasd-selinux.git
+  $ git clone https://github.com/quest-oss/vasd-selinux.git
   $ cd vasd-selinux
   $ ./vasd.sh
 ~~~
@@ -60,4 +60,4 @@ On some versions of RHEL there is already a security context defined for the /va
   Where */home* is the path to the users home directories that need the correct SElinux context label.
   
   
-Jayson Hurst <jayson.hurst@software.dell.com>
+Jayson Hurst <jayson.hurst@quest.com>
