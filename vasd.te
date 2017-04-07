@@ -1,4 +1,4 @@
-policy_module(vasd, 1.0.5)
+policy_module(vasd, 1.0.6)
 
 ########################################
 #
@@ -36,6 +36,11 @@ corecmd_executable_file( vasd_bin_t )
 
 type vasd_lib_t;
 files_type(vasd_lib_t)
+
+require{
+    type sshd_t;
+    type local_login_t;
+}
 
 ########################################
 #
