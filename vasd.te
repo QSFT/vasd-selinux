@@ -494,3 +494,16 @@ optional_policy(`
         dbus_connect_system_bus(vasd_t)
 ')
 
+# =============================================================
+# Allow sshd_t and local_login_t to access the vasd socket for 
+# authentication
+#
+# Same as:
+#      allow sshd_t initrc_t:unix_stream_socket connectto;
+#      allow local_login_t initrc_t:unix_stream_socket connectto;
+#
+# =============================================================
+ init_stream_connect_script(sshd_t)
+ init_stream_connect_script(local_login_t)
+ 
+
