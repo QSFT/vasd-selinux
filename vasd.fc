@@ -6,7 +6,6 @@
 /var/opt/quest/vas/vasd/.vasd40_ipc_sock -s 	gen_context(system_u:object_r:vasd_var_auth_t,s0)
 
 /var/opt/quest(/.*)?            gen_context(system_u:object_r:vasd_var_t,s0)
-/var/opt/quest/vas/vasd(/.*)?   gen_context(system_u:object_r:vasd_var_auth_t,s0)
 
 /opt/quest(/.*)?		gen_context(system_u:object_r:vasd_usr_t,s0)
 /opt/quest/bin(/.*)?		gen_context(system_u:object_r:vasd_bin_t,s0)
